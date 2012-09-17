@@ -43,5 +43,6 @@ unless seed
 end
 priv = Digest::SHA256.hexdigest(seed)
 pub = hex_private_key_to_hex_public_key(priv)
-puts %Q{The seed is: "#{seed}".}
-puts %Q{The key pair is: #{hex_public_key_to_wallet_import_format(pub)}:#{hex_private_key_to_wallet_import_format(priv)}.}
+puts %Q{Seed: "#{seed}".}
+puts %Q{Hash: #{priv}.}
+puts %Q{Address Pair: #{hex_public_key_to_wallet_import_format(pub)}:#{hex_private_key_to_wallet_import_format(priv)}.}
