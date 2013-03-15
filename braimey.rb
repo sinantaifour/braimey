@@ -5,6 +5,7 @@
 require './base58'
 require './ecdsa'
 require 'digest'
+require 'io/console'
 
 def hex_private_key_to_wallet_import_format(priv)
   extpriv = ["80" + priv].pack("H*")
@@ -38,11 +39,12 @@ end
 
 seed = ARGV[0]
 unless seed
-  puts "You must provide your seed as the first (and only) argument."
-  exit(1)
+  print "Enter the passprhase: "
+  seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
+  print "\n"
 end
 priv = Digest::SHA256.hexdigest(seed)
 pub = hex_private_key_to_hex_public_key(priv)
-puts %Q{Seed: "#{seed}".}
+# puts %Q{Seed: "#{seed}".}
 puts %Q{Hash: #{priv}.}
 puts %Q{Address Pair: #{hex_public_key_to_wallet_import_format(pub)}:#{hex_private_key_to_wallet_import_format(priv)}.}
