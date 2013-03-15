@@ -39,8 +39,14 @@ end
 
 seed = ARGV[0]
 unless seed
-  print "Enter the passprhase: "
+  print "Enter the passphrase: "
   seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
+  print "\n"
+  print "Re-enter the passphrase: "
+  unless STDIN.noecho { |io| io.gets }.gsub("\n", "") == seed
+    puts "\nPassphrases don't match."
+    exit(1)
+  end
   print "\n"
 end
 priv = Digest::SHA256.hexdigest(seed)
