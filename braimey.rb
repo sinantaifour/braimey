@@ -37,8 +37,10 @@ def hex_private_key_to_hex_public_key(priv)
   "04" + ("0" * 64 + res.x.to_s(16))[-64..-1]+ ("0" * 64 + res.y.to_s(16))[-64..-1]
 end
 
-seed = ARGV[0]
-unless seed
+seed = nil
+if ARGV[0] == "-s"
+  seed = ARGV[1]
+elsif ARGV[0] == "-p"
   print "Enter the passphrase: "
   seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
   print "\n"
@@ -48,7 +50,14 @@ unless seed
     exit(1)
   end
   print "\n"
+elsif ARGV[0] == "-i"
+  seed = STDIN.readline.gsub("\n", "")
 end
+unless seed
+  puts "Must specify one of -s(eed), -p(rompt), -i(nput)."
+  exit(1)
+end
+
 priv = Digest::SHA256.hexdigest(seed)
 pub = hex_private_key_to_hex_public_key(priv)
 # puts %Q{Seed: "#{seed}".}
