@@ -46,8 +46,7 @@ elsif ARGV[0] == "-p"
   print "\n"
   print "Re-enter the passphrase: "
   unless STDIN.noecho { |io| io.gets }.gsub("\n", "") == seed
-    puts "\nPassphrases don't match."
-    exit(1)
+    print "\n\e[31mPassphrases don't match.\e[0m\nShowing results for first passphrase."
   end
   print "\n"
 elsif ARGV[0] == "-i"
