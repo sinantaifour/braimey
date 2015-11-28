@@ -1,6 +1,8 @@
 #! /usr/bin/env ruby
-# A good starting point for details:
+# A good starting point for details for BitCoin and LiteCoin:
 # https://en.bitcoin.it/wiki/Technical_background_of_Bitcoin_addresses
+# For Ethereum, this code is based off:
+# https://github.com/SilentCicero/ethereumjs-accounts
 
 require './base58'
 require './ecdsa'
