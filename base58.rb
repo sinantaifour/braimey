@@ -1,9 +1,11 @@
 # Adapated from pywallet.
 # Implements the variant of Base58 encoding used in BitCoin.
+# Probably doesn't play well with unicode, but that's not needed for BitCoin
+# addresses.
 
-require 'bigdecimal' # TODO: might not be needed, could probably work with Bignum.
+require 'bigdecimal'
 
-class Base58 # TODO: probably doesn't play well with unicode.
+class Base58
 
   CHARS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
   BASE = CHARS.length

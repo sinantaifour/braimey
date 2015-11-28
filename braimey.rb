@@ -6,25 +6,34 @@ require './base58'
 require './ecdsa'
 require 'digest'
 require 'io/console'
+require 'sha3-pure-ruby'
 
-def hex_private_key_to_wallet_import_format(priv)
-  version = { :litecoin => "B0", :bitcoin => "80" }[PROTOCOL] || "80"
-  extpriv = [version + priv].pack("H*")
-  csm = Digest::SHA256.digest(Digest::SHA256.digest(extpriv))[0..3]
-  Base58.encode58(extpriv + csm)
+def hex_private_key_to_import_format(priv, protocol)
+  if [:litecoin, :bitcoin].include?(protocol)
+    version = { :litecoin => "B0", :bitcoin => "80" }[protocol]
+    extpriv = [version + priv].pack("H*")
+    csm = Digest::SHA256.digest(Digest::SHA256.digest(extpriv))[0..3]
+    Base58.encode58(extpriv + csm)
+  elsif protocol == :ethereum
+    priv
+  end
 end
 
-def hex_public_key_to_wallet_import_format(pub)
-  intermediate = [pub].pack("H*")
-  intermediate = Digest::SHA256.digest(intermediate)
-  intermediate = Digest::RMD160.digest(intermediate)
-  version = { :litecoin => "0", :bitcoin => "\x00" }[PROTOCOL] || "\x00"
-  intermediate = version + intermediate
-  extended = intermediate
-  intermediate = Digest::SHA256.digest(intermediate)
-  intermediate = Digest::SHA256.digest(intermediate)
-  csm = intermediate[0..3]
-  Base58.encode58(extended + csm)
+def hex_public_key_to_import_format(pub, protocol)
+  if [:litecoin, :bitcoin].include?(protocol)
+    intermediate = ["04" + ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]].pack("H*")
+    intermediate = Digest::SHA256.digest(intermediate)
+    intermediate = Digest::RMD160.digest(intermediate)
+    version = { :litecoin => "0", :bitcoin => "\x00" }[protocol] || "\x00"
+    intermediate = version + intermediate
+    extended = intermediate
+    intermediate = Digest::SHA256.digest(intermediate)
+    intermediate = Digest::SHA256.digest(intermediate)
+    csm = intermediate[0..3]
+    Base58.encode58(extended + csm)
+  elsif protocol == :ethereum
+    "0x" + Digest::SHA3.hexdigest([(pub[0] + pub[1])[-128..-1]].pack("H*"), 256)[-40..-1]
+  end
 end
 
 def hex_private_key_to_hex_public_key(priv)
@@ -36,16 +45,21 @@ def hex_private_key_to_hex_public_key(priv)
   r = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141".to_i(16)
   point = ECDSA::Point.new(p, a, b, gx, gy, r)
   res = point * priv.to_i(16)
-  "04" + ("0" * 64 + res.x.to_s(16))[-64..-1]+ ("0" * 64 + res.y.to_s(16))[-64..-1]
+  [res.x.to_s(16), res.y.to_s(16)]
 end
 
-# === Read the input. ===
+# Read the input.
+# ===============
 
+protocol = nil
 if ARGV[0] == "-litecoin"
-  PROTOCOL = :litecoin
+  protocol = :litecoin
+  ARGV.shift
+elsif ARGV[0] == "-ethereum"
+  protocol = :ethereum
   ARGV.shift
 else
-  PROTOCOL = :bitcoin
+  protocol = :bitcoin
 end
 
 seed = nil
@@ -68,10 +82,11 @@ unless seed
   exit(1)
 end
 
-# === Generate keys and output. ===
+# Generate keys and output.
+# =========================
 
 priv = Digest::SHA256.hexdigest(seed)
 pub = hex_private_key_to_hex_public_key(priv)
-puts "\e[34mAddresses for the #{PROTOCOL.capitalize} network.\e[0m"
-puts %Q{Hash: #{priv}.}
-puts %Q{Address Pair: #{hex_public_key_to_wallet_import_format(pub)}:#{hex_private_key_to_wallet_import_format(priv)}.}
+puts "\e[34mAddresses for the #{protocol.capitalize} network.\e[0m"
+puts "Hash: #{priv}."
+puts "Address Pair: #{hex_public_key_to_import_format(pub, protocol)}:#{hex_private_key_to_import_format(priv, protocol)}."
