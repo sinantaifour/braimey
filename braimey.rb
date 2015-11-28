@@ -26,7 +26,7 @@ def hex_public_key_to_import_format(pub, protocol)
     intermediate = ["04" + ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]].pack("H*")
     intermediate = Digest::SHA256.digest(intermediate)
     intermediate = Digest::RMD160.digest(intermediate)
-    version = { :litecoin => "0", :bitcoin => "\x00" }[protocol] || "\x00"
+    version = { :litecoin => "0", :bitcoin => "\x00" }[protocol]
     intermediate = version + intermediate
     extended = intermediate
     intermediate = Digest::SHA256.digest(intermediate)
