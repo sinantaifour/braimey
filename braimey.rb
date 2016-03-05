@@ -34,7 +34,8 @@ def hex_public_key_to_import_format(pub, protocol)
     csm = intermediate[0..3]
     Base58.encode58(extended + csm)
   elsif protocol == :ethereum
-    "0x" + Digest::SHA3.hexdigest([(pub[0] + pub[1])[-128..-1]].pack("H*"), 256)[-40..-1]
+    padded = ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]
+    "0x" + Digest::SHA3.hexdigest([padded].pack("H*"), 256)[-40..-1]
   end
 end
 
