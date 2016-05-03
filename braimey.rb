@@ -63,6 +63,13 @@ elsif ARGV[0] == "-ethereum"
   ARGV.shift
 else
   protocol = :bitcoin
+  ARGV.shift if ARGV[0] == "-bitcoin"
+end
+
+complex = false
+if ARGV[0] == "-complex"
+  complex = true
+  ARGV.shift
 end
 
 seed = nil
@@ -89,6 +96,9 @@ end
 # =========================
 
 priv = Digest::SHA256.hexdigest(seed)
+if complex
+  1000000.times { priv = Digest::SHA256.hexdigest(priv) }
+end
 pub = hex_private_key_to_hex_public_key(priv)
 puts "\e[34mAddresses for the #{protocol.capitalize} network.\e[0m"
 puts "Hash: #{priv}."
