@@ -8,7 +8,7 @@ require './base58'
 require './ecdsa'
 require 'digest'
 require 'io/console'
-require 'sha3-pure-ruby'
+require 'digest/sha3'
 
 def hex_private_key_to_import_format(priv, protocol)
   if [:litecoin, :bitcoin].include?(protocol)
