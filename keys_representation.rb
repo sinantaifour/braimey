@@ -10,6 +10,10 @@ end
 
 class PrivateKeyRepresentation < KeysRepresentation
   def hex_key_to_import_format(priv, protocol)
+    if priv == ""
+      return priv
+    end
+
     if [:litecoin, :bitcoin].include?(protocol)
       version = { :litecoin => "B0", :bitcoin => "80" }[protocol]
       extpriv = [version + priv].pack("H*")
@@ -17,12 +21,18 @@ class PrivateKeyRepresentation < KeysRepresentation
       Base58.encode58(extpriv + csm)
     elsif protocol == :ethereum
       priv
+    else
+      nil
     end
   end
 end
 
 class PublicKeyRepresentation < KeysRepresentation
   def hex_key_to_import_format(pub, protocol)
+    if pub == ""
+      return pub
+    end
+
     if [:litecoin, :bitcoin].include?(protocol)
       intermediate = ["04" + ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]].pack("H*")
       intermediate = Digest::SHA256.digest(intermediate)
@@ -37,6 +47,8 @@ class PublicKeyRepresentation < KeysRepresentation
     elsif protocol == :ethereum
       padded = ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]
       "0x" + Digest::SHA3.hexdigest([padded].pack("H*"), 256)[-40..-1]
+    else
+      ""
     end
   end
 end
