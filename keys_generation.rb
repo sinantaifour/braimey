@@ -1,4 +1,6 @@
-require './ecdsa'
+require 'digest'
+require 'digest/sha3'
+require_relative 'ecdsa'
 
 class KeysGeneration
   def generate_key(seed)

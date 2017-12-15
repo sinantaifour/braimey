@@ -1,4 +1,6 @@
-require './base58'
+require 'digest'
+require 'digest/sha3'
+require_relative 'base58'
 
 class KeysRepresentation
   def hex_key_to_import_format(key, protocol)

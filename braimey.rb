@@ -4,9 +4,9 @@
 # For Ethereum, this code is based off:
 # https://github.com/SilentCicero/ethereumjs-accounts
 
-require './keys_generation'
-require './phrase_expansion'
-require './keys_representation'
+require_relative 'keys_generation'
+require_relative 'phrase_expansion'
+require_relative 'keys_representation'
 require 'digest'
 require 'io/console'
 require 'digest/sha3'
@@ -89,39 +89,45 @@ The protocol can be the last argument or between any full argument. example:
   else
     raise "Unknown protcol: #{protocol}. Please chose one of ethereum, bitcoin, or litecoin"
   end
-
   options
+end
+
+def retrieve_seed(options)
+  seed = ""
+  if options[:source] == :seed
+    seed = options[:seed]
+  elsif options[:source] == :prompt
+    print "Enter the passphrase: "
+    seed = STDIN.noecho {|io| io.gets}.gsub("\n", "")
+    print "\n"
+    print "Re-enter the passphrase: "
+    unless STDIN.noecho {|io| io.gets}.gsub("\n", "") == seed
+      print "\n\e[31mPassphrases don't match.\e[0m\nShowing results for first passphrase."
+    end
+    print "\n"
+  elsif options[:source] == :input
+    seed = STDIN.readline.gsub("\n", "")
+  end
+  raise("Seed was not provided. Check your syntax") if seed == ""
+  seed
 end
 
 # Parse options based on arguments.
 # =================================
 
 options = parse_args(ARGV)
-seed = ""
-if options[:source] == :seed
-  seed = options[:seed]
-elsif options[:source] == :prompt
-  print "Enter the passphrase: "
-  seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
-  print "\n"
-  print "Re-enter the passphrase: "
-  unless STDIN.noecho { |io| io.gets }.gsub("\n", "") == seed
-    print "\n\e[31mPassphrases don't match.\e[0m\nShowing results for first passphrase."
-  end
-  print "\n"
-elsif options[:source] == :input
-  seed = STDIN.readline.gsub("\n", "")
-end
+seed = retrieve_seed(options)
 
-raise("Seed was not provided. Check your syntax") if seed == ""
-
-# Generate keys and output.
-# =========================
+# Generate keys.
+# ==============
 
 phrase_expansion = LoopedShaExtension.new(options[:iterations])
 private = PrivateKeysGeneration.new(phrase_expansion).generate_key(seed)
 public = PublicKeysGeneration.new().generate_key(private)
 
+# Format and output.
+# ==================
+#
 puts "\e[34mAddresses for the #{options[:protocol].capitalize} network.\e[0m"
 puts "Hash: #{private}."
 public_hex = PublicKeyRepresentation.new().hex_key_to_import_format(public, options[:protocol])
