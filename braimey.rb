@@ -9,6 +9,7 @@ require './ecdsa'
 require 'digest'
 require 'io/console'
 require 'digest/sha3'
+require 'optparse'
 
 def hex_private_key_to_import_format(priv, protocol)
   if [:litecoin, :bitcoin].include?(protocol)
@@ -54,28 +55,89 @@ end
 # Read the input.
 # ===============
 
-protocol = nil
-if ARGV[0] == "-litecoin"
-  protocol = :litecoin
-  ARGV.shift
-elsif ARGV[0] == "-ethereum"
-  protocol = :ethereum
-  ARGV.shift
-else
-  protocol = :bitcoin
-  ARGV.shift if ARGV[0] == "-bitcoin"
+def parse_args(args)
+  # Args and defaults
+  options = {}
+  options[:iterations] = 0
+  options[:source] = nil
+
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = "Usage: braimey.rb [options] protocol"
+    protocols_help = <<-EOE
+Select one of the following protocols:
+    bitcoin: Bitcoin, bitcoin, or BTC
+    litecoin: Litecoin, litecoin, or LTC
+    ethereum: Ethereum, ethereum, or ETH
+
+The protocol can be the last argument or between any full argument. example:
+    ruby braimey.rb bitcoin -s <seed> ...
+    ruby braimey.rb -i -e 10 LTC
+    ruby braimey -e 10 ethereum -p
+    EOE
+
+    opts.separator ""
+    opts.separator "Options:"
+
+    opts.on("-s", "--seed [SEED]", "Provide pass phrase in the command") do |s|
+      raise("Two sources are provided. Please provide either -s(eed), -p(rompt), or -i(nput)") if options[:source]
+      options[:source] = :seed
+      options[:seed] = s
+    end
+    opts.on("-p", "--prompt", "Provide pass phrase following the instructions in a prompt") do
+      raise("Two sources are provided. Please provide either -s(eed), -p(rompt), or -i(nput)") if options[:source]
+      options[:source] = :prompt
+    end
+    opts.on("-i", "--input", "Input the passphrase once after the command") do
+      raise("Two sources are provided. Please provide either -s(eed), -p(rompt), or -i(nput)") if options[:source]
+      options[:source] = :input
+    end
+
+    opts.on("-e", "--expansion [COUNT]", Integer,
+            "The number of expansion iterations on the key, default 0 (take key as is)") do |it|
+      options[:iterations] = it
+    end
+
+    opts.on_tail("-h", "--help", "Show help text") do
+      puts opts
+      print "\n", protocols_help
+      exit
+
+    opts.separator ""
+    opts.separator "protocols:"
+
+    end
+  end
+
+  opt_parser.parse!(args)
+
+  raise("No pass phrase source seleceted. Please provide either -s(eed), -p(rompt), or -i(nput)") unless options[:source]
+
+  protocol = args.pop
+  raise "Protocol is missing and is mandetory. Please select one of ethereum, bitcoin, or litecoin" unless protocol
+
+  raise "Too many arguments passed: #{args}. Exiting" if args.any?
+
+  if %w(ethereum Ethereum Ether ETH).include? protocol
+    options[:protocol] = :ethereum
+  elsif %w(bitcoin Bitcoin BTC).include? protocol
+    options[:protocol] = :bitcoin
+  elsif %w(litecoin Litecoin LTC).include? protocol
+    options[:protocol] = :litecoin
+  else
+    raise "Unknown protcol: #{protocol}. Please chose one of ethereum, bitcoin, or litecoin"
+  end
+
+  options
 end
 
-complex = false
-if ARGV[0] == "-complex"
-  complex = true
-  ARGV.shift
-end
+# Parse options based on arguments.
+# =================================
 
-seed = nil
-if ARGV[0] == "-s"
-  seed = ARGV[1]
-elsif ARGV[0] == "-p"
+options = parse_args(ARGV)
+seed = ""
+if options[:source] == :seed
+  seed = options[:seed]
+elsif options[:source] == :prompt
   print "Enter the passphrase: "
   seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
   print "\n"
@@ -84,22 +146,21 @@ elsif ARGV[0] == "-p"
     print "\n\e[31mPassphrases don't match.\e[0m\nShowing results for first passphrase."
   end
   print "\n"
-elsif ARGV[0] == "-i"
+elsif options[:source] == :input
   seed = STDIN.readline.gsub("\n", "")
 end
-unless seed
-  puts "Must specify one of -s(eed), -p(rompt), -i(nput)."
-  exit(1)
-end
+
+raise("Seed was not provided. Check your syntax") if seed == ""
 
 # Generate keys and output.
 # =========================
 
 priv = Digest::SHA256.hexdigest(seed)
-if complex
-  1000000.times { priv = Digest::SHA256.hexdigest(priv) }
+if options[:iterations] > 0
+  options[:iterations].times { priv = Digest::SHA256.hexdigest(priv) }
 end
+
 pub = hex_private_key_to_hex_public_key(priv)
-puts "\e[34mAddresses for the #{protocol.capitalize} network.\e[0m"
+puts "\e[34mAddresses for the #{options[:protocol].capitalize} network.\e[0m"
 puts "Hash: #{priv}."
-puts "Address Pair: #{hex_public_key_to_import_format(pub, protocol)}:#{hex_private_key_to_import_format(priv, protocol)}."
+puts "Address Pair: #{hex_public_key_to_import_format(pub, options[:protocol])}:#{hex_private_key_to_import_format(priv, options[:protocol])}."
