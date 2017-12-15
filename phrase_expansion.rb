@@ -14,6 +14,7 @@ class LoopedShaExtension < PhraseExpansion
   end
 
   def expand_phrase(phrase)
+    return phrase if phrase == ""
     expanded_phrase = phrase
     @count.times { expanded_phrase = @expansion_method.call(expanded_phrase) }
     expanded_phrase
