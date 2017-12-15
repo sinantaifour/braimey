@@ -29,8 +29,8 @@ end
 
 class PublicKeyRepresentation < KeysRepresentation
   def hex_key_to_import_format(pub, protocol)
-    if pub == ""
-      return pub
+    if not pub.is_a? Array and pub.length != 2
+      return ""
     end
 
     if [:litecoin, :bitcoin].include?(protocol)

@@ -123,13 +123,13 @@ seed = retrieve_seed(options)
 
 phrase_expansion = LoopedShaExtension.new(options[:iterations])
 private = PrivateKeysGeneration.new(phrase_expansion).generate_key(seed)
-public = PublicKeysGeneration.new().generate_key(private)
+public = PublicKeysGeneration.new.generate_key(private)
 
 # Format and output.
 # ==================
 #
 puts "\e[34mAddresses for the #{options[:protocol].capitalize} network.\e[0m"
 puts "Hash: #{private}."
-public_hex = PublicKeyRepresentation.new().hex_key_to_import_format(public, options[:protocol])
-private_hex = PrivateKeyRepresentation.new().hex_key_to_import_format(private, options[:protocol])
+public_hex = PublicKeyRepresentation.new.hex_key_to_import_format(public, options[:protocol])
+private_hex = PrivateKeyRepresentation.new.hex_key_to_import_format(private, options[:protocol])
 puts "Address Pair: #{public_hex}:#{private_hex}."

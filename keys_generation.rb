@@ -16,6 +16,7 @@ class PrivateKeysGeneration < KeysGeneration
   end
 
   def generate_key(seed)
+    return "" if seed == ""
     expanded_seed = @phrase_expander.expand_phrase(seed)
     Digest::SHA256.hexdigest(expanded_seed)
   end
@@ -23,6 +24,7 @@ end
 
 class PublicKeysGeneration < KeysGeneration
   def generate_key(seed)
+    return "" if seed == ""
     p = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".to_i(16)
     a = "0000000000000000000000000000000000000000000000000000000000000000".to_i(16)
     b = "0000000000000000000000000000000000000000000000000000000000000007".to_i(16)
