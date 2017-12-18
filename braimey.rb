@@ -5,7 +5,7 @@
 # https://github.com/SilentCicero/ethereumjs-accounts
 
 require_relative 'keys_generation'
-require_relative 'phrase_expansion'
+require_relative 'key_stretching'
 require_relative 'keys_representation'
 require 'digest'
 require 'io/console'
@@ -121,8 +121,8 @@ seed = retrieve_seed(options)
 # Generate keys.
 # ==============
 
-phrase_expansion = LoopedShaExtension.new(options[:iterations])
-private = PrivateKeysGeneration.new(phrase_expansion).generate_key(seed)
+phrase_stretching = LoopedShaStretching.new(options[:iterations])
+private = PrivateKeysGeneration.new(phrase_stretching).generate_key(seed)
 public = PublicKeysGeneration.new.generate_key(private)
 
 # Format and output.

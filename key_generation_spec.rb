@@ -1,15 +1,15 @@
 require 'rspec'
 require_relative 'keys_generation'
-require_relative 'phrase_expansion'
+require_relative 'key_stretching'
 
-class ExpanderMock < PhraseExpansion
+class StretchingMock < KeyStretching
   def self.expand_phrase(phrase)
     phrase
   end
 end
 
 describe 'PublicKeyGeneration' do
-  expander = ExpanderMock
+  expander = StretchingMock
   context 'private key generation' do
     generator = PrivateKeysGeneration.new(expander)
     it 'should return an empty key if there is an empty seed' do

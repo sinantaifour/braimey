@@ -1,13 +1,13 @@
 require 'digest'
 require 'digest/sha3'
 
-class PhraseExpansion
+class KeyStretching
   def expand_phrase(phrase)
     raise NotImplementedError
   end
 end
 
-class LoopedShaExtension < PhraseExpansion
+class LoopedShaStretching < KeyStretching
   def initialize(count)
     @count = count
     @expansion_method = Proc.new do |phrase| Digest::SHA256.hexdigest(phrase) end

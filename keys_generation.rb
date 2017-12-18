@@ -12,12 +12,12 @@ end
 # based on which implementation is opted for.
 class PrivateKeysGeneration < KeysGeneration
   def initialize(phrase_expander)
-    @phrase_expander = phrase_expander
+    @key_stretcher = phrase_expander
   end
 
   def generate_key(seed)
     return "" if seed == ""
-    expanded_seed = @phrase_expander.expand_phrase(seed)
+    expanded_seed = @key_stretcher.expand_phrase(seed)
     Digest::SHA256.hexdigest(expanded_seed)
   end
 end
