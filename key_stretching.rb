@@ -1,5 +1,6 @@
 require 'digest'
 require 'digest/sha3'
+# require 'scrypt'
 
 class KeyStretching
   def expand_phrase(phrase)
@@ -20,3 +21,4 @@ class LoopedShaStretching < KeyStretching
     expanded_phrase
   end
 end
+

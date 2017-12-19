@@ -28,3 +28,5 @@ describe 'LoopedShaExpansion' do
     expect(expander.expand_phrase(input)).to eql(expected_output)
   end
 end
+
+
