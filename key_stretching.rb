@@ -1,6 +1,5 @@
 require 'digest'
 require 'digest/sha3'
-# require 'scrypt'
 
 class KeyStretching
   def expand_phrase(phrase)

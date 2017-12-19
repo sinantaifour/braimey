@@ -8,9 +8,7 @@ require_relative 'keys_generation'
 require_relative 'key_stretching'
 require_relative 'keys_representation'
 require_relative 'argon_stretching'
-require 'digest'
 require 'io/console'
-require 'digest/sha3'
 require 'optparse'
 
 # Read the input.
