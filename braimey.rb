@@ -7,6 +7,7 @@
 require_relative 'keys_generation'
 require_relative 'key_stretching'
 require_relative 'keys_representation'
+require_relative 'argon_stretching'
 require 'digest'
 require 'io/console'
 require 'digest/sha3'
@@ -16,8 +17,13 @@ require 'optparse'
 # ===============
 
 def parse_args(args)
+  if args.length == 0
+    print("No arguments passed. Check help (-h) for the options \n")
+    exit()
+  end
   # Options and null options object
   options = {}
+  options[:expansion] = false
   options[:iterations] = 0
   options[:source] = nil
   options[:seed] = ""
@@ -32,14 +38,19 @@ Select one of the following protocols:
     litecoin: Litecoin, litecoin, or LTC
     ethereum: Ethereum, ethereum, or ETH
 
-The protocol can be the last argument or between any full argument. example:
+The protocol argument can be anywhere between full argument (beginning, middle, last). examples:
     ruby braimey.rb bitcoin -s <seed> ...
-    ruby braimey.rb -i -e 10 LTC
-    ruby braimey -e 10 ethereum -p
+    ruby braimey.rb -i -t 10 LTC -e argon
+    ruby braimey -t 10 ethereum -p -e looped
+
+Whereas the following is wrong:
+    ruby braimey -t ethereum 10 -p -e looped
+
     EOE
 
     opts.separator ""
     opts.separator "Options:"
+    opts.separator "  phrase input:"
 
     opts.on("-s", "--seed [SEED]", "Provide pass phrase in the command") do |s|
       raise("Two sources are provided. Please provide either -s(eed), -p(rompt), or -i(nput)") if options[:source]
@@ -55,25 +66,34 @@ The protocol can be the last argument or between any full argument. example:
       options[:source] = :input
     end
 
-    opts.on("-e", "--expansion [COUNT]", Integer,
-            "The number of expansion iterations on the key, default 0 (take key as is)") do |it|
+    opts.separator "  expansion options:"
+    opts.on("-e", "--expansion [METHOD]", "The Expansion method to use. Can be one of: [argon, looped]") do |exp|
+      options[:expansion] = :argon if exp == "argon"
+      options[:expansion] = :looped if exp == "looped"
+      raise("Invalid expansion method: #{exp}") unless options[:expansion]
+    end
+
+    opts.on("-t", "--iterations [COUNT]", Integer,
+            "The number/time for the selected expansion method.") do |it|
       options[:iterations] = it
     end
 
+    opts.separator "  other options:"
     opts.on_tail("-h", "--help", "Show help text") do
       puts opts
       print "\n", protocols_help
       exit
 
     opts.separator ""
-    opts.separator "protocols:"
 
     end
   end
 
   opt_parser.parse!(args)
 
-  raise("No pass phrase source seleceted. Please provide either -s(eed), -p(rompt), or -i(nput)") unless options[:source]
+  raise("No pass phrase source selected. Please provide either -s(eed), -p(rompt), or -i(nput)") unless options[:source]
+  raise("No expansion method selected, but iterations were set") if options[:iterations] > 0 and !options[:expansion]
+  raise("No iterations were set, but expansion method was selected") if options[:iterations] == 0 and options[:expansion]
 
   protocol = args.pop
   raise "Protocol is missing and is mandetory. Please select one of ethereum, bitcoin, or litecoin" unless protocol
@@ -121,7 +141,14 @@ seed = retrieve_seed(options)
 # Generate keys.
 # ==============
 
-phrase_stretching = LoopedShaStretching.new(options[:iterations])
+if options[:expansion] == :looped
+  phrase_stretching = LoopedShaStretching.new(options[:iterations])
+elsif options[:expansion] == :argon
+  phrase_stretching = ArgonStretching.new(options[:iterations])
+else
+  phrase_stretching = LoopedShaStretching.new(0)
+end
+
 private = PrivateKeysGeneration.new(phrase_stretching).generate_key(seed)
 public = PublicKeysGeneration.new.generate_key(private)
 

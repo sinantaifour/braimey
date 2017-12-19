@@ -10,7 +10,7 @@ class ArgonStretching < KeyStretching
 
   def expand_phrase(phrase)
     len = phrase.length
-    raise("Pass phrase should be larger than #{@salt_size}") unless len > @salt_size
+    raise("Pass phrase should be larger than #{@salt_size} in order to use argon expansion") unless len > @salt_size
     salt = phrase[0 .. @salt_size - 1]
     phrase = phrase[@salt_size..-1]
     raise unless salt.length == @salt_size
