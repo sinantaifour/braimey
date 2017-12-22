@@ -8,10 +8,49 @@ class StretchingMock < KeyStretching
   end
 end
 
-describe 'PublicKeyGeneration' do
-  expander = StretchingMock
+
+def get_random_string(len)
+  source=("a".."z").to_a + (0..9).to_a
+  key=""
+  len.times{ key += source[rand(source.size)].to_s }
+  key
+end
+
+describe 'KeyGeneration' do
+
   context 'private key generation' do
+    expander = StretchingMock
     generator = PrivateKeysGeneration.new(expander)
+
+    # Some property testing
+    it 'should always generate the same output length regardless of the input size' do
+      expected_length = 64
+      i = 2
+      until i == 200 do
+        i += 2
+        input = get_random_string(i)
+        expect(generator.generate_key(input).length).to eql(expected_length)
+      end
+    end
+
+    it 'should generate unique keys for different inputs' do
+      inputs = []
+      keys = []
+      i = 0
+      until i == 200 do
+        i += 1
+
+        input = get_random_string(50)
+        continue if inputs.include? input
+        inputs.push(input)
+
+        keys.push(generator.generate_key(input))
+
+        expect(keys.length).to eql(keys.uniq.length), "there was a collision in the private key creation for the following inputs: #{inputs}"
+      end
+    end
+
+    # some value testing
     it 'should return an empty key if there is an empty seed' do
       input = ""
       expected_output = input
@@ -23,10 +62,50 @@ describe 'PublicKeyGeneration' do
       expected_output = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
       expect(generator.generate_key(input)).to eql(expected_output)
     end
+
   end
 
   context 'public key generation' do
     generator = PublicKeysGeneration.new
+
+    # Some property testing
+    # Tests are still failing, despite using a local generator created in each loop
+    # it 'should always generate the same output length regardless of the input size' do
+    #   i = 1
+    #   expected_length = 64
+    #   until i == 100 do
+    #     # Seems ECDSA can only be used once per instance. Therefore, recreating the genreator every loop
+    #     i += 1
+    #
+    #     input = get_random_string(64)
+    #
+    #     local_generator = PublicKeysGeneration.new
+    #     public_key = local_generator.generate_key(input)
+    #
+    #     expect(public_key[0].length).to eql(expected_length)
+    #     expect(public_key[1].length).to eql(expected_length)
+    #   end
+    # end
+    #
+    # it 'should generate unique keys for different inputs' do
+    #   inputs = []
+    #   keys = []
+    #   i = 0
+    #   until i == 200 do
+    #     i += 1
+    #
+    #     input = get_random_string(64)
+    #     continue if inputs.include? input
+    #     inputs.push(input)
+    #
+    #     local_generator = PublicKeysGeneration.new
+    #     keys.push(local_generator.generate_key(input))
+    #
+    #     expect(keys.length).to eql(keys.uniq.length), "there was a collision in the private key creation for the following inputs: #{inputs}"
+    #   end
+    # end
+
+    # Some value testing
     it 'should return an empty key if there is an empty seed' do
       input = ""
       expected_output = input
