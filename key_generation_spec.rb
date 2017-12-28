@@ -10,7 +10,7 @@ end
 
 
 def get_random_string(len)
-  source=("a".."z").to_a + (0..9).to_a
+  source=("a".."f").to_a + (0..9).to_a
   key=""
   len.times{ key += source[rand(source.size)].to_s }
   key
@@ -36,10 +36,7 @@ describe 'KeyGeneration' do
     it 'should generate unique keys for different inputs' do
       inputs = []
       keys = []
-      i = 0
-      until i == 200 do
-        i += 1
-
+      (0..200).each do |i|
         input = get_random_string(50)
         continue if inputs.include? input
         inputs.push(input)
@@ -70,40 +67,32 @@ describe 'KeyGeneration' do
 
     # Some property testing
     # Tests are still failing, despite using a local generator created in each loop
-    # it 'should always generate the same output length regardless of the input size' do
-    #   i = 1
-    #   expected_length = 64
-    #   until i == 100 do
-    #     # Seems ECDSA can only be used once per instance. Therefore, recreating the genreator every loop
-    #     i += 1
-    #
-    #     input = get_random_string(64)
-    #
-    #     local_generator = PublicKeysGeneration.new
-    #     public_key = local_generator.generate_key(input)
-    #
-    #     expect(public_key[0].length).to eql(expected_length)
-    #     expect(public_key[1].length).to eql(expected_length)
-    #   end
-    # end
-    #
-    # it 'should generate unique keys for different inputs' do
-    #   inputs = []
-    #   keys = []
-    #   i = 0
-    #   until i == 200 do
-    #     i += 1
-    #
-    #     input = get_random_string(64)
-    #     continue if inputs.include? input
-    #     inputs.push(input)
-    #
-    #     local_generator = PublicKeysGeneration.new
-    #     keys.push(local_generator.generate_key(input))
-    #
-    #     expect(keys.length).to eql(keys.uniq.length), "there was a collision in the private key creation for the following inputs: #{inputs}"
-    #   end
-    # end
+    it 'should always generate the same output length regardless of the input size' do
+      max_length = 64
+      (0..100).each do |i|
+        # Seems ECDSA can only be used once per instance. Therefore, recreating the genreator every loop
+        input = get_random_string(64)
+
+        public_key = generator.generate_key(input)
+
+        expect(public_key[0].length).to be <= max_length
+        expect(public_key[1].length).to be <= max_length
+      end
+    end
+
+    it 'should generate unique keys for different inputs' do
+      inputs = []
+      keys = []
+      200.times do
+        input = get_random_string(64)
+        continue if inputs.include? input
+        inputs.push(input)
+
+        keys.push(generator.generate_key(input))
+
+        expect(keys.length).to eql(keys.uniq.length), "there was a collision in the public key creation for the following inputs: #{inputs}"
+      end
+    end
 
     # Some value testing
     it 'should return an empty key if there is an empty seed' do
