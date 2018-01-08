@@ -5,7 +5,7 @@
 # https://github.com/SilentCicero/ethereumjs-accounts
 
 require_relative 'keys_generation'
-require_relative 'key_stretching'
+require_relative 'looped_sha_stretching'
 require_relative 'keys_representation'
 require_relative 'argon_stretching'
 require 'io/console'

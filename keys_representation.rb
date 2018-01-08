@@ -2,13 +2,7 @@ require 'digest'
 require 'digest/sha3'
 require_relative 'base58'
 
-class KeysRepresentation
-  def hex_key_to_import_format(key, protocol)
-    raise NotImplementedError
-  end
-end
-
-class PrivateKeyRepresentation < KeysRepresentation
+class PrivateKeyRepresentation
   def hex_key_to_import_format(priv, protocol)
     if priv == ""
       return priv
@@ -27,7 +21,7 @@ class PrivateKeyRepresentation < KeysRepresentation
   end
 end
 
-class PublicKeyRepresentation < KeysRepresentation
+class PublicKeyRepresentation
   def hex_key_to_import_format(pub, protocol)
     if not pub.is_a? Array and pub.length != 2
       return ""

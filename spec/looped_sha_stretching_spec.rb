@@ -1,7 +1,7 @@
 require 'rspec'
-require_relative '../key_stretching'
+require_relative '../looped_sha_stretching'
 
-describe 'LoopedShaExpansion' do
+describe 'LoopedShaStretching' do
   it 'should should not expand an empty string, and return it as is' do
     expander = LoopedShaStretching.new(100)
     input = ""

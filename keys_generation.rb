@@ -2,15 +2,10 @@ require 'digest'
 require 'digest/sha3'
 require_relative 'ecdsa'
 
-class KeysGeneration
-  def generate_key(seed)
-    raise NotImplementedError
-  end
-end
 
 # I am not familiar with bip39 yet, it could be possible that we have to abstract the expansion and generation,
 # based on which implementation is opted for.
-class PrivateKeysGeneration < KeysGeneration
+class PrivateKeysGeneration
   def initialize(phrase_expander)
     @key_stretcher = phrase_expander
   end
@@ -22,7 +17,7 @@ class PrivateKeysGeneration < KeysGeneration
   end
 end
 
-class PublicKeysGeneration < KeysGeneration
+class PublicKeysGeneration
   def generate_key(seed)
     return "" if seed == ""
     p = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".to_i(16)
@@ -33,7 +28,7 @@ class PublicKeysGeneration < KeysGeneration
     r = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141".to_i(16)
     point = ECDSA::Point.new(p, a, b, gx, gy, r)
     res = point * seed.to_i(16)
-    [(res.x.to_s(16).rjust(64,"0"))[-64..-1], (res.y.to_s(16).rjust(64, "0"))[-64..-1]]
+    [(res.x.to_s(16).rjust(64,"0")), (res.y.to_s(16).rjust(64, "0"))]
   end
 end
 

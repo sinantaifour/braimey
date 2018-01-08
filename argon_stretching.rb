@@ -1,7 +1,6 @@
 require 'argon2'
-require_relative 'key_stretching'
 
-class ArgonStretching < KeyStretching
+class ArgonStretching
   def initialize(iterations)
     raise("Iterations should be between 1 and 750!") if iterations < 1 or iterations > 750
     @salt_size = 16
