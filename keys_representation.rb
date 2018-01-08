@@ -33,8 +33,12 @@ class PublicKeyRepresentation < KeysRepresentation
       return ""
     end
 
+    if pub[0][/\H/] or pub[1][/\H/]
+      return ""
+    end
+
     if [:litecoin, :bitcoin].include?(protocol)
-      intermediate = ["04" + ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]].pack("H*")
+      intermediate = ["04" + pub[0] + pub[1]].pack("H*")
       intermediate = Digest::SHA256.digest(intermediate)
       intermediate = Digest::RMD160.digest(intermediate)
       version = { :litecoin => "0", :bitcoin => "\x00" }[protocol]
@@ -45,7 +49,7 @@ class PublicKeyRepresentation < KeysRepresentation
       csm = intermediate[0..3]
       Base58.encode58(extended + csm)
     elsif protocol == :ethereum
-      padded = ("0" * 64 + pub[0])[-64..-1]+ ("0" * 64 + pub[1])[-64..-1]
+      padded = pub[0] + pub[1]
       "0x" + Digest::SHA3.hexdigest([padded].pack("H*"), 256)[-40..-1]
     else
       ""

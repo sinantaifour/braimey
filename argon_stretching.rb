@@ -15,7 +15,7 @@ class ArgonStretching < KeyStretching
     phrase = phrase[@salt_size..-1]
     raise unless salt.length == @salt_size
     raise unless phrase.length == len - @salt_size
-    expander = Argon2::Password.new(t_cost: @iterations, m_cost: 16, salt_do_not_supply: "a1b2c3d4e5f6g7h8")
+    expander = Argon2::Password.new(t_cost: @iterations, m_cost: 16, salt_do_not_supply: salt)
     expander.create(phrase)
   end
 end

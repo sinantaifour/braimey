@@ -4,69 +4,64 @@ require_relative '../keys_representation'
 describe 'PublicKeysRepresentation' do
   representor = PublicKeyRepresentation.new
 
+  valid_input = ["5f81956d5826bad7d30daed2b5c8c98e72046c1ec8323da336445476183fb7ca", "54ba511b8b782bc5085962412e8b9879496e3b60bebee7c36987d1d5848b9a50"]
+  invalid_input_empty = ""
+  invalid_input_not_array = "This is a malformed input"
+  invalid_input_not_hex = ["this is a", "malformed input"]
+
   context "for unknown protocols" do
     protocol = nil
     it 'should silently return an empty string' do
-      input = ["", ""]
       expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(valid_input, protocol)).to eql(expected_output)
     end
   end
 
   context "for bitcoin protocol" do
     protocol = :bitcoin
     it 'should silently return an empty string for malformed inputs' do
-      input = ""
       expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
 
-      input = "This is a malformed input"
-      expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
     end
 
     it 'should return the expected output for a given input' do
-      input = ["t", "h"]
-      expected_output = "18sDSsJPoGNSZau6GMs95BM6nSe4T41ird"
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expected_output = "1HKqKTMpBTZZ8H5zcqYEWYBaaWELrDEXeE"
+      expect(representor.hex_key_to_import_format(valid_input, protocol)).to eql(expected_output)
     end
   end
 
   context "for litecoin protocol" do
     protocol = :litecoin
     it 'should silently return an empty string for malformed inputs' do
-      input = ""
       expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
 
-      input = "this is a malformed input"
-      expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
     end
 
     it 'should return the expected output for a given input' do
-      input = ["t", "h"]
-      expected_output = "LT6Ai5cDsvcVpPbFSVrSMCQrzf1LVcfKk4"
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expected_output = "LbYnaffeG7ocP5n9nyXXnZFLnibd27wms5"
+      expect(representor.hex_key_to_import_format(valid_input, protocol)).to eql(expected_output)
     end
   end
 
   context "for ethereum protocol" do
     protocol = :ethereum
     it 'should silently return an empty string for malformed inputs' do
-      input = ""
       expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
 
-      input = "Malformed input"
-      expected_output = ""
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
+      expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
     end
 
     it 'should return the expected output for an input' do
-      input = ["t", "h"]
-      expected_output = "0x334dbde866c9b8b039036b87c5eb2fd89bcb6bab"
-      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      expected_output = "0x2a260a110bc7b03f19c40a0bd04ff2c5dcb57594"
+      expect(representor.hex_key_to_import_format(valid_input, protocol)).to eql(expected_output)
     end
   end
 end
