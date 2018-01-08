@@ -4,7 +4,8 @@
 # For Ethereum, this code is based off:
 # https://github.com/SilentCicero/ethereumjs-accounts
 
-require_relative 'keys_generation'
+require_relative 'private_keys_generation'
+require_relative 'public_key_generation'
 require_relative 'looped_sha_stretching'
 require_relative 'keys_representation'
 require_relative 'argon_stretching'
@@ -20,31 +21,27 @@ def parse_args(args)
     exit()
   end
   # Options and null options object
-  options = {}
-  options[:expansion] = false
-  options[:iterations] = 0
-  options[:source] = nil
-  options[:seed] = ""
-  options[:source] = nil
-  options[:protocol] = :null
+  options = {:expansion => false, :iterations => 0, :seed => nil,
+             :source => nil, :protocol => nil}
 
   opt_parser = OptionParser.new do |opts|
     opts.banner = "Usage: braimey.rb [options] protocol"
     protocols_help = <<-EOE
-Select one of the following protocols:
-    bitcoin: Bitcoin, bitcoin, or BTC
-    litecoin: Litecoin, litecoin, or LTC
-    ethereum: Ethereum, ethereum, or ETH
-
-The protocol argument can be anywhere between full argument (beginning, middle, last). examples:
-    ruby braimey.rb bitcoin -s <seed> ...
-    ruby braimey.rb -i -t 10 LTC -e argon
-    ruby braimey -t 10 ethereum -p -e looped
-
-Whereas the following is wrong:
-    ruby braimey -t ethereum 10 -p -e looped
-
+      Select one of the following protocols:
+          bitcoin: Bitcoin, bitcoin, or BTC
+          litecoin: Litecoin, litecoin, or LTC
+          ethereum: Ethereum, ethereum, or ETH
+       
+      The protocol argument can be anywhere between full argument (beginning, middle, last). examples:
+          ruby braimey.rb bitcoin -s <seed> ...
+          ruby braimey.rb -i -t 10 LTC -e argon
+          ruby braimey -t 10 ethereum -p -e looped
+       
+      Whereas the following is wrong:
+          ruby braimey -t ethereum 10 -p -e looped
     EOE
+
+    protocols_help = protocols_help.gsub(Regexp.new("^\\s{#{protocols_help.split("\n").first.match(/^\s*/)[0].length}}"), "")
 
     opts.separator ""
     opts.separator "Options:"
@@ -66,15 +63,13 @@ Whereas the following is wrong:
 
     opts.separator "  expansion options:"
     opts.on("-e", "--expansion [METHOD]", "The Expansion method to use. Can be one of: [argon, looped]") do |exp|
-      options[:expansion] = :argon if exp == "argon"
-      options[:expansion] = :looped if exp == "looped"
-      raise("Invalid expansion method: #{exp}") unless options[:expansion]
+      if ["argon", "looped"].include? exp
+        options[:expansion] = exp.to_sym
+      else raise("Invalid expansion method: #{exp}") end
     end
 
     opts.on("-t", "--iterations [COUNT]", Integer,
-            "The number/time for the selected expansion method.") do |it|
-      options[:iterations] = it
-    end
+            "The number/time for the selected expansion method.") { |it| options[:iterations] = it }
 
     opts.separator "  other options:"
     opts.on_tail("-h", "--help", "Show help text") do
@@ -96,7 +91,7 @@ Whereas the following is wrong:
   protocol = args.pop
   raise "Protocol is missing and is mandetory. Please select one of ethereum, bitcoin, or litecoin" unless protocol
 
-  raise "Too many arguments passed: #{args}. Exiting" if args.any?
+  raise "Too many arguments passed: #{args}. Exiting" unless args.empty?
 
   if %w(ethereum Ethereum Ether ETH).include? protocol
     options[:protocol] = :ethereum
@@ -116,10 +111,10 @@ def retrieve_seed(options)
     seed = options[:seed]
   elsif options[:source] == :prompt
     print "Enter the passphrase: "
-    seed = STDIN.noecho {|io| io.gets}.gsub("\n", "")
+    seed = STDIN.noecho { |io| io.gets }.gsub("\n", "")
     print "\n"
     print "Re-enter the passphrase: "
-    unless STDIN.noecho {|io| io.gets}.gsub("\n", "") == seed
+    unless STDIN.noecho { |io| io.gets }.gsub("\n", "") == seed
       print "\n\e[31mPassphrases don't match.\e[0m\nShowing results for first passphrase."
     end
     print "\n"
@@ -147,14 +142,14 @@ else
   phrase_stretching = LoopedShaStretching.new(0)
 end
 
-private = PrivateKeysGeneration.new(phrase_stretching).generate_key(seed)
-public = PublicKeysGeneration.new.generate_key(private)
+private_key = PrivateKeysGeneration.new(phrase_stretching).generate_key(seed)
+public_key = PublicKeysGeneration.new.generate_key(private_key)
 
 # Format and output.
 # ==================
 #
 puts "\e[34mAddresses for the #{options[:protocol].capitalize} network.\e[0m"
-puts "Hash: #{private}."
-public_hex = PublicKeyRepresentation.new.hex_key_to_import_format(public, options[:protocol])
-private_hex = PrivateKeyRepresentation.new.hex_key_to_import_format(private, options[:protocol])
+puts "Hash: #{private_key}."
+public_hex = PublicKeyRepresentation.hex_key_to_import_format(public_key, options[:protocol])
+private_hex = PrivateKeyRepresentation.hex_key_to_import_format(private_key, options[:protocol])
 puts "Address Pair: #{public_hex}:#{private_hex}."

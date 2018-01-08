@@ -3,7 +3,7 @@ require 'digest/sha3'
 require_relative 'base58'
 
 class PrivateKeyRepresentation
-  def hex_key_to_import_format(priv, protocol)
+  def self.hex_key_to_import_format(priv, protocol)
     if priv == ""
       return priv
     end
@@ -16,18 +16,18 @@ class PrivateKeyRepresentation
     elsif protocol == :ethereum
       priv
     else
-      nil
+      ""
     end
   end
 end
 
 class PublicKeyRepresentation
-  def hex_key_to_import_format(pub, protocol)
+  def self.hex_key_to_import_format(pub, protocol)
     if not pub.is_a? Array and pub.length != 2
       return ""
     end
 
-    if pub[0][/\H/] or pub[1][/\H/]
+    if (pub[0][/\H/] or pub[0].length != 64) or (pub[1][/\H/] or pub[1].length != 64)
       return ""
     end
 
@@ -50,5 +50,3 @@ class PublicKeyRepresentation
     end
   end
 end
-
-

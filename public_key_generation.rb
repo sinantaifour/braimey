@@ -1,25 +1,9 @@
-require 'digest'
-require 'digest/sha3'
 require_relative 'ecdsa'
 
 
-# I am not familiar with bip39 yet, it could be possible that we have to abstract the expansion and generation,
-# based on which implementation is opted for.
-class PrivateKeysGeneration
-  def initialize(phrase_expander)
-    @key_stretcher = phrase_expander
-  end
-
-  def generate_key(seed)
-    return "" if seed == ""
-    expanded_seed = @key_stretcher.expand_phrase(seed)
-    Digest::SHA256.hexdigest(expanded_seed)
-  end
-end
-
 class PublicKeysGeneration
-  def generate_key(seed)
-    return "" if seed == ""
+  def generate_key(private_key)
+    return "" if private_key == ""
     p = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".to_i(16)
     a = "0000000000000000000000000000000000000000000000000000000000000000".to_i(16)
     b = "0000000000000000000000000000000000000000000000000000000000000007".to_i(16)
@@ -27,8 +11,7 @@ class PublicKeysGeneration
     gy = "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8".to_i(16)
     r = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141".to_i(16)
     point = ECDSA::Point.new(p, a, b, gx, gy, r)
-    res = point * seed.to_i(16)
+    res = point * private_key.to_i(16)
     [(res.x.to_s(16).rjust(64,"0")), (res.y.to_s(16).rjust(64, "0"))]
   end
 end
-

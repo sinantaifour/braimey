@@ -1,5 +1,6 @@
 require 'rspec'
-require_relative '../keys_generation'
+require_relative '../private_keys_generation'
+require_relative '../public_key_generation'
 
 class StretchingMock
   def self.expand_phrase(phrase)
@@ -9,14 +10,13 @@ end
 
 
 def get_random_string(len)
-  source=("a".."f").to_a + (0..9).to_a
-  key=""
-  len.times{ key += source[rand(source.size)].to_s }
-  key
+  source = ("a".."f").to_a + ("0".."9").to_a
+  (0..len).map { source[rand(source.size)] }.join("")
 end
 
 describe 'KeysGeneration' do
 
+  property_tests_iterations = 200
   context 'private key generation' do
     expander = StretchingMock
     generator = PrivateKeysGeneration.new(expander)
@@ -24,9 +24,7 @@ describe 'KeysGeneration' do
     # Some property testing
     it 'should always generate the same output length regardless of the input size' do
       expected_length = 64
-      i = 2
-      until i == 200 do
-        i += 2
+      (2..property_tests_iterations).each do |i|
         input = get_random_string(i)
         expect(generator.generate_key(input).length).to eql(expected_length)
       end
@@ -35,15 +33,16 @@ describe 'KeysGeneration' do
     it 'should generate unique keys for different inputs' do
       inputs = []
       keys = []
-      (0..200).each do |i|
+      (0..property_tests_iterations).each do
         input = get_random_string(50)
         continue if inputs.include? input
         inputs.push(input)
 
         keys.push(generator.generate_key(input))
-
-        expect(keys.length).to eql(keys.uniq.length), "there was a collision in the private key creation for the following inputs: #{inputs}"
       end
+
+      expect(keys.length).to eql(keys.uniq.length), "there was a collision in the private key creation for the following inputs: #{inputs}"
+
     end
 
     # some value testing
@@ -68,7 +67,7 @@ describe 'KeysGeneration' do
     # Tests are still failing, despite using a local generator created in each loop
     it 'should always generate the same output length regardless of the input size' do
       max_length = 64
-      (0..100).each do |i|
+      (0..property_tests_iterations).each do
         # Seems ECDSA can only be used once per instance. Therefore, recreating the genreator every loop
         input = get_random_string(64)
 
@@ -82,15 +81,15 @@ describe 'KeysGeneration' do
     it 'should generate unique keys for different inputs' do
       inputs = []
       keys = []
-      200.times do
+      property_tests_iterations.times do
         input = get_random_string(64)
         continue if inputs.include? input
         inputs.push(input)
 
         keys.push(generator.generate_key(input))
-
-        expect(keys.length).to eql(keys.uniq.length), "there was a collision in the public key creation for the following inputs: #{inputs}"
       end
+
+      expect(keys.length).to eql(keys.uniq.length), "there was a collision in the public key creation for the following inputs: #{inputs}"
     end
 
     # Some value testing

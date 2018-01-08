@@ -4,9 +4,8 @@ require_relative '../looped_sha_stretching'
 describe 'LoopedShaStretching' do
   it 'should should not expand an empty string, and return it as is' do
     expander = LoopedShaStretching.new(100)
-    input = ""
     expected_output = ""
-    expect(expander.expand_phrase(input)).to eql(expected_output)
+    expect(expander.expand_phrase("")).to eql(expected_output)
   end
 
   input = "this is a test"

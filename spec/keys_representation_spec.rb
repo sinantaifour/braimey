@@ -2,9 +2,10 @@ require 'rspec'
 require_relative '../keys_representation'
 
 describe 'PublicKeysRepresentation' do
-  representor = PublicKeyRepresentation.new
+  representor = PublicKeyRepresentation
 
   valid_input = ["5f81956d5826bad7d30daed2b5c8c98e72046c1ec8323da336445476183fb7ca", "54ba511b8b782bc5085962412e8b9879496e3b60bebee7c36987d1d5848b9a50"]
+  invalid_length_input = ["e72046c1ec8323da336445476183fb7ca", "5e3b60bebee7c36987d1d5848b9a50"]
   invalid_input_empty = ""
   invalid_input_not_array = "This is a malformed input"
   invalid_input_not_hex = ["this is a", "malformed input"]
@@ -22,6 +23,7 @@ describe 'PublicKeysRepresentation' do
     it 'should silently return an empty string for malformed inputs' do
       expected_output = ""
 
+      expect(representor.hex_key_to_import_format(invalid_length_input, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
@@ -38,6 +40,7 @@ describe 'PublicKeysRepresentation' do
     it 'should silently return an empty string for malformed inputs' do
       expected_output = ""
 
+      expect(representor.hex_key_to_import_format(invalid_length_input, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
@@ -54,6 +57,7 @@ describe 'PublicKeysRepresentation' do
     it 'should silently return an empty string for malformed inputs' do
       expected_output = ""
 
+      expect(representor.hex_key_to_import_format(invalid_length_input, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_empty, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_array, protocol)).to eql(expected_output)
       expect(representor.hex_key_to_import_format(invalid_input_not_hex, protocol)).to eql(expected_output)
@@ -68,13 +72,16 @@ end
 
 
 describe 'PrivateKeyRepresentation' do
-  representor = PrivateKeyRepresentation.new
+  representor = PrivateKeyRepresentation
 
   context "for unknown protocols" do
     protocol = nil
     it 'should silently return an empty string' do
-      input = ""
       expected_output = ""
+
+      input = ""
+      expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
+      input = "thisisatest"
       expect(representor.hex_key_to_import_format(input, protocol)).to eql(expected_output)
     end
   end
