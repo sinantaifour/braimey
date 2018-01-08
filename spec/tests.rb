@@ -2,7 +2,7 @@
 
 def run(protocol, result)
   print "Testing #{protocol} ... "
-  if `ruby braimey.rb #{protocol} -s "thisisatest"`.split("\n").grep(/Address Pair/).first.split(": ").last == result + "."
+  if `ruby ../braimey.rb #{protocol} -s "thisisatest"`.split("\n").grep(/Address Pair/).first.split(": ").last == result + "."
     puts "OK."
   else
     puts "FAILED!"

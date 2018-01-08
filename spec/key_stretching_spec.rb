@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative 'key_stretching'
+require_relative '../key_stretching'
 
 describe 'LoopedShaExpansion' do
   it 'should should not expand an empty string, and return it as is' do

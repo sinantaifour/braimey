@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative 'argon_stretching'
+require_relative '../argon_stretching'
 
 describe 'ArgonStretching' do
   input = "thistestthissaltthistestthisphrase"

@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative 'keys_representation'
+require_relative '../keys_representation'
 
 describe 'PublicKeysRepresentation' do
   representor = PublicKeyRepresentation.new

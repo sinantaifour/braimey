@@ -1,8 +1,7 @@
 require 'rspec'
-require_relative 'keys_generation'
-require_relative 'key_stretching'
+require_relative '../keys_generation'
 
-class StretchingMock < KeyStretching
+class StretchingMock
   def self.expand_phrase(phrase)
     phrase
   end
@@ -16,7 +15,7 @@ def get_random_string(len)
   key
 end
 
-describe 'KeyGeneration' do
+describe 'KeysGeneration' do
 
   context 'private key generation' do
     expander = StretchingMock
