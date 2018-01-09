@@ -13,8 +13,6 @@ class ArgonStretching
     raise("Pass phrase should be larger than #{SALT_SIZE} in order to use argon expansion") unless len > SALT_SIZE
     salt = phrase[0..(SALT_SIZE - 1)]
     phrase = phrase[SALT_SIZE..-1]
-    raise unless salt.length == SALT_SIZE
-    raise unless phrase.length == len - SALT_SIZE
     expander = Argon2::Password.new(t_cost: @iterations, m_cost: 16, salt_do_not_supply: salt)
     expander.create(phrase)
   end

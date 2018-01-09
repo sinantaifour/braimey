@@ -89,7 +89,7 @@ def parse_args(args)
   raise("No iterations were set, but expansion method was selected") if options[:iterations] == 0 and options[:expansion]
 
   protocol = args.pop
-  raise "Protocol is missing and is mandetory. Please select one of ethereum, bitcoin, or litecoin" unless protocol
+  raise "Protocol is missing and is mandatory. Please select one of ethereum, bitcoin, or litecoin" unless protocol
 
   raise "Too many arguments passed: #{args}. Exiting" unless args.empty?
 
