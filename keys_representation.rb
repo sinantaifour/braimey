@@ -27,7 +27,7 @@ class PublicKeyRepresentation
       return ""
     end
 
-    if (pub[0][/\H/] or pub[0].length != 64) or (pub[1][/\H/] or pub[1].length != 64)
+    if (pub[0].match(/\H/) || pub[0].length != 64) || (pub[1].match(/\H/) || pub[1].length != 64)
       return ""
     end
 
