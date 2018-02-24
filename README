@@ -1,1 +1,7 @@
 Braimey (from "brain" and "money") is a simple tool that generates a Bitcoin address and a corresponding private key from a secret seed, allowing you to easily create brain wallets.
+
+Requiremed Gems:
+- digest
+- digest-sha3
+- arogn2
+- rspec (for testing)
